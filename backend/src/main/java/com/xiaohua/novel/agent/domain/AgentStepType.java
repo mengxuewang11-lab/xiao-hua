@@ -1,0 +1,14 @@
+package com.xiaohua.novel.agent.domain;
+
+public enum AgentStepType {
+    RESEARCH_MARKET,
+    GENERATE_PROPOSALS,
+    INITIALIZE_FOUNDATION,
+    PLAN_CHAPTERS,
+    GENERATE_CHAPTER,
+    VALIDATE_OUTPUT,
+    REVIEW_QUALITY,
+    CHECK_CONTINUITY,
+    REVISE_CHAPTER,
+    COMMIT_CHAPTER
+}
