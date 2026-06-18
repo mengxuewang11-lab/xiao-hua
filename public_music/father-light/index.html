@@ -141,6 +141,42 @@
       color: rgba(255, 249, 239, 0.68);
       font-size: 13px;
     }
+
+    .calibrator {
+      display: none;
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.42);
+    }
+
+    .calibrator.show {
+      display: block;
+    }
+
+    .calibrator button {
+      min-height: 36px;
+      margin: 4px 4px 4px 0;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 6px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.12);
+      font: inherit;
+    }
+
+    .calibrator textarea {
+      width: 100%;
+      min-height: 120px;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: rgba(0, 0, 0, 0.38);
+      font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
   </style>
 </head>
 <body>
@@ -153,6 +189,14 @@
       <a href="./father-light.mp3" download>下载音频</a>
       <section id="lyrics" class="lyrics" aria-label="歌词">
         <div class="lyrics-title">歌词</div>
+      </section>
+      <section id="calibrator" class="calibrator" aria-label="歌词校准">
+        <div class="lyrics-title">歌词校准</div>
+        <button id="prevLine" type="button">上一句</button>
+        <button id="markLine" type="button">记录当前句</button>
+        <button id="nextLine" type="button">下一句</button>
+        <button id="exportLrc" type="button">导出时间轴</button>
+        <textarea id="lrcOutput" readonly></textarea>
       </section>
     </section>
   </main>
@@ -204,6 +248,8 @@
     const audio = document.getElementById("audio");
     const box = document.getElementById("lyrics");
     const status = document.getElementById("status");
+    const calibrator = document.getElementById("calibrator");
+    const lrcOutput = document.getElementById("lrcOutput");
     let sourceIndex = 0;
     let activeIndex = -1;
     let waitingTimer = 0;
@@ -339,6 +385,51 @@
         status.textContent = "当前网络加载失败，请点下载音频或稍后重试";
       }
     });
+
+    function formatTime(time) {
+      const minutes = Math.floor(time / 60);
+      const seconds = time - minutes * 60;
+      return `${String(minutes).padStart(2, "0")}:${seconds.toFixed(2).padStart(5, "0")}`;
+    }
+
+    function exportTimeline() {
+      const text = lyrics.map(([time, line]) => `[${formatTime(time)}]${line}`).join("\n");
+      lrcOutput.value = text;
+      return text;
+    }
+
+    if (new URLSearchParams(location.search).get("calibrate") === "1") {
+      calibrator.classList.add("show");
+      exportTimeline();
+
+      document.getElementById("prevLine").addEventListener("click", () => {
+        setActive(Math.max(0, activeIndex - 1));
+        audio.currentTime = lyrics[activeIndex][0];
+        syncLyrics(true);
+      });
+
+      document.getElementById("nextLine").addEventListener("click", () => {
+        setActive(Math.min(lines.length - 1, activeIndex + 1));
+        audio.currentTime = lyrics[activeIndex][0];
+        syncLyrics(true);
+      });
+
+      document.getElementById("markLine").addEventListener("click", () => {
+        lyrics[activeIndex][0] = Math.max(0, audio.currentTime || 0);
+        status.textContent = `已记录：第 ${activeIndex + 1} 句 ${formatTime(lyrics[activeIndex][0])}`;
+        exportTimeline();
+      });
+
+      document.getElementById("exportLrc").addEventListener("click", async () => {
+        const text = exportTimeline();
+        try {
+          await navigator.clipboard.writeText(text);
+          status.textContent = "时间轴已复制";
+        } catch {
+          status.textContent = "时间轴已生成，请手动复制";
+        }
+      });
+    }
 
     syncLyrics();
   </script>
