@@ -118,7 +118,10 @@
     <section class="player">
       <h1>父亲的光</h1>
       <p class="tagline">愿这束温暖的光，陪你慢慢听完这一首歌。</p>
-      <audio controls preload="metadata" src="./father-light.mp3"></audio>
+      <audio controls preload="metadata">
+        <source src="./father-light.mp3" type="audio/mpeg">
+        <source src="https://cdn.jsdelivr.net/gh/mengxuewang11-lab/xiao-hua@1061a61f17fb6ea0f1b9bef22be62c3959db675c/public_music/father-light/father-light.mp3" type="audio/mpeg">
+      </audio>
       <a href="./father-light.mp3" download>下载音频</a>
       <section class="lyrics" aria-label="歌词">
         <div class="lyrics-title">歌词</div>
