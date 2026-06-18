@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <title>父亲的光</title>
   <style>
     :root {
@@ -151,11 +153,8 @@
     <section class="player">
       <h1>父亲的光</h1>
       <p class="tagline">愿这束温暖的光，陪你慢慢听完这一首歌。</p>
-      <audio id="audio" controls preload="auto" crossorigin="anonymous">
-        <source src="https://cdn.jsdelivr.net/gh/mengxuewang11-lab/xiao-hua@1061a61f17fb6ea0f1b9bef22be62c3959db675c/public_music/father-light/father-light.mp3" type="audio/mpeg">
-        <source src="./father-light.mp3" type="audio/mpeg">
-      </audio>
-      <div id="status" class="status">加载音频中...</div>
+      <audio id="audio" controls preload="auto" playsinline></audio>
+      <div id="status" class="status">点击播放，歌词会自动跟随</div>
       <a href="./father-light.mp3" download>下载音频</a>
       <section id="lyrics" class="lyrics" aria-label="歌词">
         <div class="lyrics-title">歌词</div>
@@ -203,11 +202,19 @@
       [263, "藏着整个世界的温暖"]
     ];
 
+    const sources = [
+      "https://cdn.jsdelivr.net/gh/mengxuewang11-lab/xiao-hua@1061a61f17fb6ea0f1b9bef22be62c3959db675c/public_music/father-light/father-light.mp3",
+      "./father-light.mp3"
+    ];
     const audio = document.getElementById("audio");
     const box = document.getElementById("lyrics");
     const status = document.getElementById("status");
     const title = box.querySelector(".lyrics-title");
     let activeIndex = -1;
+    let sourceIndex = 0;
+    let waitingTimer = 0;
+
+    audio.src = sources[sourceIndex];
 
     lyrics.forEach(([time, text], index) => {
       const line = document.createElement("p");
@@ -246,25 +253,63 @@
       setActive(next);
     }
 
+    function switchSource(reason) {
+      if (sourceIndex >= sources.length - 1) return;
+      const wasPaused = audio.paused;
+      const currentTime = audio.currentTime || 0;
+      sourceIndex += 1;
+      audio.src = sources[sourceIndex];
+      audio.load();
+      audio.currentTime = currentTime;
+      status.textContent = reason || "已切换备用线路";
+      if (!wasPaused) {
+        audio.play().catch(() => {
+          status.textContent = "已切换备用线路，请再次点击播放";
+        });
+      }
+    }
+
+    function clearWaitingTimer() {
+      if (waitingTimer) {
+        clearTimeout(waitingTimer);
+        waitingTimer = 0;
+      }
+    }
+
     audio.addEventListener("loadedmetadata", () => {
-      status.textContent = "音频已就绪";
+      status.textContent = "点击播放，歌词会自动跟随";
       updateLyrics();
     });
 
     audio.addEventListener("canplay", () => {
-      status.textContent = "可以播放";
+      clearWaitingTimer();
+      status.textContent = audio.paused ? "点击播放，歌词会自动跟随" : "正在播放";
     });
 
     audio.addEventListener("waiting", () => {
       status.textContent = "网络缓冲中...";
+      clearWaitingTimer();
+      waitingTimer = setTimeout(() => {
+        switchSource("当前线路较慢，已切换备用线路");
+      }, 6000);
     });
 
     audio.addEventListener("playing", () => {
+      clearWaitingTimer();
       status.textContent = "正在播放";
     });
 
+    audio.addEventListener("pause", () => {
+      clearWaitingTimer();
+      status.textContent = "已暂停";
+    });
+
     audio.addEventListener("error", () => {
-      status.textContent = "当前网络加载失败，请点下载音频或稍后重试";
+      if (sourceIndex < sources.length - 1) {
+        switchSource("当前线路加载失败，已切换备用线路");
+      } else {
+        status.textContent = "当前网络加载失败，请点下载音频或稍后重试";
+      }
     });
 
     audio.addEventListener("timeupdate", updateLyrics);
