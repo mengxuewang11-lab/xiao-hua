@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <title>父亲的光</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #fff9ef;
+      --muted: rgba(255, 249, 239, 0.78);
+      --line: rgba(255, 255, 255, 0.2);
+      --accent: #ffdca8;
+      --panel: rgba(12, 10, 8, 0.58);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 26px 20px 36px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: #14120f url("./background.png") center / cover no-repeat fixed;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(12, 10, 8, 0.12) 0%, rgba(12, 10, 8, 0.44) 40%, rgba(12, 10, 8, 0.86) 100%),
+        radial-gradient(circle at 50% 18%, rgba(255, 218, 163, 0.24), rgba(20, 18, 15, 0) 38%);
+      pointer-events: none;
+    }
+
+    main {
+      width: min(100%, 540px);
+      min-height: calc(100vh - 62px);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .player {
+      padding: 22px 0 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(38px, 12vw, 68px);
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-shadow: 0 3px 18px rgba(0, 0, 0, 0.42);
+    }
+
+    p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    audio {
+      width: 100%;
+      display: block;
+      margin-top: 6px;
+      accent-color: var(--accent);
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 14px;
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .tagline {
+      max-width: 24em;
+    }
+
+    .lyrics {
+      height: min(46vh, 420px);
+      margin-top: 18px;
+      padding: 18px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.22);
+    }
+
+    .lyrics-title {
+      position: sticky;
+      top: -18px;
+      margin: -18px -18px 10px;
+      padding: 14px 18px 10px;
+      background: linear-gradient(180deg, rgba(12, 10, 8, 0.92), rgba(12, 10, 8, 0));
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      z-index: 1;
+    }
+
+    .line {
+      margin: 0;
+      padding: 6px 0;
+      color: rgba(255, 249, 239, 0.58);
+      font-size: 17px;
+      line-height: 1.75;
+      transition: color 140ms ease, transform 140ms ease;
+    }
+
+    .line.active {
+      color: #fff9ef;
+      font-weight: 800;
+      transform: translateX(4px);
+      text-shadow: 0 2px 16px rgba(255, 220, 168, 0.22);
+    }
+
+    .line.past {
+      color: rgba(255, 249, 239, 0.36);
+    }
+
+    .status {
+      min-height: 22px;
+      margin-top: 10px;
+      color: rgba(255, 249, 239, 0.68);
+      font-size: 13px;
+    }
+
+    .calibrator {
+      display: none;
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.42);
+    }
+
+    .calibrator.show {
+      display: block;
+    }
+
+    .calibrator button {
+      min-height: 36px;
+      margin: 4px 4px 4px 0;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 6px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.12);
+      font: inherit;
+    }
+
+    .calibrator textarea {
+      width: 100%;
+      min-height: 120px;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: rgba(0, 0, 0, 0.38);
+      font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="player">
+      <h1>父亲的光</h1>
+      <p class="tagline">愿这束温暖的光，陪你慢慢听完这一首歌。</p>
+      <audio id="audio" controls preload="auto" playsinline></audio>
+      <div id="status" class="status">点击播放，歌词会按播放进度同步滚动</div>
+      <a href="./father-light.mp3" download>下载音频</a>
+      <section id="lyrics" class="lyrics" aria-label="歌词">
+        <div class="lyrics-title">歌词</div>
+      </section>
+      <section id="calibrator" class="calibrator" aria-label="歌词校准">
+        <div class="lyrics-title">歌词校准</div>
+        <button id="prevLine" type="button">上一句</button>
+        <button id="markLine" type="button">记录当前句</button>
+        <button id="nextLine" type="button">下一句</button>
+        <button id="exportLrc" type="button">导出时间轴</button>
+        <textarea id="lrcOutput" readonly></textarea>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const sources = [
+      "https://cdn.jsdelivr.net/gh/mengxuewang11-lab/xiao-hua@1061a61f17fb6ea0f1b9bef22be62c3959db675c/public_music/father-light/father-light.mp3",
+      "./father-light.mp3"
+    ];
+    const lyrics = [
+      [7.00, "他很少说起辛苦"],
+      [13.77, "只把沉默留在肩膀"],
+      [21.50, "风吹过旧时的路"],
+      [28.27, "他走得比谁都稳当"],
+      [39.00, "时间把话说得很轻"],
+      [45.82, "却在皱纹里留下回响"],
+      [53.50, "那些没说出口的期望"],
+      [61.18, "都藏在目光的远方"],
+      [71.00, "父亲的光 不喧哗地亮"],
+      [78.39, "像一盏灯 在夜里守望"],
+      [85.78, "不说永远 却一直在场"],
+      [93.16, "陪我走过 每段成长"],
+      [99.73, "父亲的光 不张扬的暖"],
+      [107.12, "像一双手 托住重量"],
+      [113.69, "岁月很长 他却很短"],
+      [120.25, "留给我的 是方向"],
+      [134.00, "他习惯把累藏起来"],
+      [141.47, "只把安心留给身旁"],
+      [148.93, "我慢慢学会理解"],
+      [155.47, "那些沉默里的回答"],
+      [162.93, "有些爱不用表达"],
+      [169.47, "却早已写进日常"],
+      [176.00, "在我回头的每一刻"],
+      [183.47, "他都站在来路上"],
+      [194.00, "父亲的光 不喧哗地亮"],
+      [201.39, "像一盏灯 在夜里守望"],
+      [208.78, "不说永远 却一直在场"],
+      [216.16, "陪我走过 每段成长"],
+      [222.73, "父亲的光 不张扬的暖"],
+      [230.12, "像一双手 托住重量"],
+      [236.69, "岁月很长 他却很短"],
+      [243.25, "留给我的 是方向"],
+      [252.00, "如果时间会慢一点"],
+      [255.10, "我想多看他一眼"],
+      [257.81, "那沉默的身影里"],
+      [260.52, "藏着整个世界的温暖"]
+    ];
+
+    const audio = document.getElementById("audio");
+    const box = document.getElementById("lyrics");
+    const status = document.getElementById("status");
+    const calibrator = document.getElementById("calibrator");
+    const lrcOutput = document.getElementById("lrcOutput");
+    let sourceIndex = 0;
+    let activeIndex = -1;
+    let waitingTimer = 0;
+    let rafId = 0;
+
+    audio.src = sources[sourceIndex];
+
+    lyrics.forEach(([time, text], index) => {
+      const line = document.createElement("p");
+      line.className = "line";
+      line.dataset.index = index;
+      line.dataset.time = time;
+      line.textContent = text;
+      line.addEventListener("click", () => {
+        audio.currentTime = time;
+        syncLyrics(true);
+        audio.play().catch(() => {});
+      });
+      box.appendChild(line);
+    });
+
+    const lines = [...box.querySelectorAll(".line")];
+
+    function setActive(index) {
+      if (index === activeIndex) return;
+      activeIndex = index;
+      lines.forEach((line, i) => {
+        line.classList.toggle("active", i === index);
+        line.classList.toggle("past", i < index);
+      });
+      centerLine(index);
+    }
+
+    function centerLine(index) {
+      const line = lines[index];
+      if (!line) return;
+      const target = line.offsetTop - (box.clientHeight / 2) + (line.offsetHeight / 2);
+      box.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+    }
+
+    function currentLyricIndex() {
+      const t = audio.currentTime || 0;
+      let index = 0;
+      for (let i = 0; i < lyrics.length; i += 1) {
+        if (t >= lyrics[i][0]) index = i;
+        else break;
+      }
+      return index;
+    }
+
+    function syncLyrics(forceCenter = false) {
+      const index = currentLyricIndex();
+      if (forceCenter || index !== activeIndex) {
+        setActive(index);
+      }
+    }
+
+    function tick() {
+      syncLyrics();
+      if (!audio.paused && !audio.ended) {
+        rafId = requestAnimationFrame(tick);
+      }
+    }
+
+    function startTicking() {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function switchSource(reason) {
+      if (sourceIndex >= sources.length - 1) return;
+      const wasPaused = audio.paused;
+      const currentTime = audio.currentTime || 0;
+      sourceIndex += 1;
+      audio.src = sources[sourceIndex];
+      audio.load();
+      audio.currentTime = currentTime;
+      status.textContent = reason || "已切换备用线路";
+      if (!wasPaused) {
+        audio.play().catch(() => {
+          status.textContent = "已切换备用线路，请再次点击播放";
+        });
+      }
+    }
+
+    function clearWaitingTimer() {
+      if (waitingTimer) {
+        clearTimeout(waitingTimer);
+        waitingTimer = 0;
+      }
+    }
+
+    audio.addEventListener("loadedmetadata", syncLyrics);
+    audio.addEventListener("timeupdate", syncLyrics);
+    audio.addEventListener("seeked", syncLyrics);
+
+    audio.addEventListener("canplay", () => {
+      clearWaitingTimer();
+      status.textContent = audio.paused ? "点击播放，歌词会按播放进度同步滚动" : "正在播放";
+    });
+
+    audio.addEventListener("waiting", () => {
+      status.textContent = "网络缓冲中...";
+      clearWaitingTimer();
+      waitingTimer = setTimeout(() => {
+        switchSource("当前线路较慢，已切换备用线路");
+      }, 6000);
+    });
+
+    audio.addEventListener("playing", () => {
+      clearWaitingTimer();
+      status.textContent = "正在播放";
+      startTicking();
+    });
+
+    audio.addEventListener("pause", () => {
+      clearWaitingTimer();
+      cancelAnimationFrame(rafId);
+      status.textContent = "已暂停";
+      syncLyrics();
+    });
+
+    audio.addEventListener("ended", () => {
+      cancelAnimationFrame(rafId);
+      syncLyrics();
+      status.textContent = "播放完成";
+    });
+
+    audio.addEventListener("error", () => {
+      if (sourceIndex < sources.length - 1) {
+        switchSource("当前线路加载失败，已切换备用线路");
+      } else {
+        status.textContent = "当前网络加载失败，请点下载音频或稍后重试";
+      }
+    });
+
+    function formatTime(time) {
+      const minutes = Math.floor(time / 60);
+      const seconds = time - minutes * 60;
+      return `${String(minutes).padStart(2, "0")}:${seconds.toFixed(2).padStart(5, "0")}`;
+    }
+
+    function exportTimeline() {
+      const text = lyrics.map(([time, line]) => `[${formatTime(time)}]${line}`).join("\n");
+      lrcOutput.value = text;
+      return text;
+    }
+
+    if (new URLSearchParams(location.search).get("calibrate") === "1") {
+      calibrator.classList.add("show");
+      exportTimeline();
+
+      document.getElementById("prevLine").addEventListener("click", () => {
+        setActive(Math.max(0, activeIndex - 1));
+        audio.currentTime = lyrics[activeIndex][0];
+        syncLyrics(true);
+      });
+
+      document.getElementById("nextLine").addEventListener("click", () => {
+        setActive(Math.min(lines.length - 1, activeIndex + 1));
+        audio.currentTime = lyrics[activeIndex][0];
+        syncLyrics(true);
+      });
+
+      document.getElementById("markLine").addEventListener("click", () => {
+        lyrics[activeIndex][0] = Math.max(0, audio.currentTime || 0);
+        status.textContent = `已记录：第 ${activeIndex + 1} 句 ${formatTime(lyrics[activeIndex][0])}`;
+        exportTimeline();
+      });
+
+      document.getElementById("exportLrc").addEventListener("click", async () => {
+        const text = exportTimeline();
+        try {
+          await navigator.clipboard.writeText(text);
+          status.textContent = "时间轴已复制";
+        } catch {
+          status.textContent = "时间轴已生成，请手动复制";
+        }
+      });
+    }
+
+    syncLyrics();
+  </script>
+</body>
+</html>
