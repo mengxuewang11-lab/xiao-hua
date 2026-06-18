@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>父亲的光</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #fff9ef;
+      --muted: rgba(255, 249, 239, 0.78);
+      --line: rgba(255, 255, 255, 0.2);
+      --accent: #ffdca8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      align-items: end;
+      padding: 28px 22px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: #14120f url("https://cdn.jsdelivr.net/gh/mengxuewang11-lab/xiao-hua@4c5b45143fa43e9087ecfd3cb1fd4a7ce1a3c2b8/public_music/father-light/background.png") center / cover no-repeat fixed;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(12, 10, 8, 0.08) 0%, rgba(12, 10, 8, 0.38) 42%, rgba(12, 10, 8, 0.82) 100%),
+        radial-gradient(circle at 50% 18%, rgba(255, 218, 163, 0.24), rgba(20, 18, 15, 0) 38%);
+      pointer-events: none;
+    }
+
+    main {
+      width: min(100%, 520px);
+      margin: 0 auto;
+      padding: 28px 0 18px;
+      border: 1px solid var(--line);
+      border-width: 1px 0 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(38px, 12vw, 68px);
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-shadow: 0 3px 18px rgba(0, 0, 0, 0.42);
+    }
+
+    p {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    audio {
+      width: 100%;
+      display: block;
+      margin-top: 6px;
+      accent-color: var(--accent);
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .tagline {
+      max-width: 24em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>父亲的光</h1>
+    <p class="tagline">愿这束温暖的光，陪你慢慢听完这一首歌。</p>
+    <audio controls preload="metadata" src="https://cdn.jsdelivr.net/gh/mengxuewang11-lab/xiao-hua@1061a61f17fb6ea0f1b9bef22be62c3959db675c/public_music/father-light/father-light.mp3"></audio>
+    <a href="https://cdn.jsdelivr.net/gh/mengxuewang11-lab/xiao-hua@1061a61f17fb6ea0f1b9bef22be62c3959db675c/public_music/father-light/father-light.mp3" download>下载音频</a>
+  </main>
+</body>
+</html>
